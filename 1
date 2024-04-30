@@ -4,7 +4,6 @@ import time as time
 import handtrackmodule as htm
 import numpy as np
 import math
-import alsaaudio
 ########################################################
 wCam, hCam = 640,480
 ########################################################
@@ -14,9 +13,6 @@ cap.set(4,hCam)
 detector = htm.handDetector(detectionCon=0.6)
 pTime = 0
 cTime = 0
-mixer = alsaaudio.Mixer()
-mixer.setmute(1)
-mute = True
 while True:
     success, img = cap.read()
     
@@ -25,7 +21,7 @@ while True:
     pTime = cTime
 
     flipped = cv.flip(img,1)
-    #cv.putText(flipped, str(int(fps)), (40,70), cv.FONT_HERSHEY_COMPLEX, 1, (250,250,0),2)
+    cv.putText(flipped, str(int(fps)), (40,70), cv.FONT_HERSHEY_COMPLEX, 1, (250,250,0),2)
     flipped = detector.findHands(flipped,draw=False)
     lmList = detector.findPositions(flipped,draw=False)
     if len(lmList)!=0:
@@ -37,25 +33,11 @@ while True:
         #cv.circle(flipped, (x2,y2), 10, (255,255,0), -1)
         #cv.line(flipped, (x1,y1), (x2,y2), (190,200,0), 3)
         length = math.hypot(x2-x1, y2-y1)
-        n = 0
-        fin = 0
+        print(length)
         if length<50:
-            if mute:
-                #cv.circle(flipped, (cx,cy), 10, (0,0,255), -1)
-                mixer.setmute(0)
-                mute = False
-                print("Unmuted")
-                continue
-            if not mute:
-                #cv.circle(flipped, (cx,cy), 10, (0,255,0), -1)
-                mixer.setmute(1)
-                mute = True
-                print("Muted")
-                continue
-            fin = time.now()
-        duration = (fin-n)
-        print(duration)
-    #cv.imshow("Footage",flipped)
+            cv.circle(flipped, (cx,cy), 10, (0,255,0), -1)
+            pyautogui.press('volumemute')
+    cv.imshow("Footage",flipped)
     cv.waitKey(1)
 
 
